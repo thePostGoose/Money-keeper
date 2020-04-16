@@ -1,60 +1,83 @@
-let validatedPromptNumber = validatedPrompt('number');
-let validatedPromptString = validatedPrompt('string');
+let decorators = {
+  //return function which calls prompt(question, '') in accordance with expected type of value 
+  validatePrompt(expectedType) {
+    if (expectedType === 'number') {
+      return function (question, defaultQestion = '') {
+        let validatedValue = +prompt(question, defaultQestion);
+        while (!validatedValue) {
+          alert('Введите корректное значение');
+          validatedValue = +prompt(question, defaultQestion);
+        }
+        return validatedValue;
+      };
+    }
+    if (expectedType === 'string') {
+      return function (question, defaultQestion = '') {
+        let validatedValue = prompt(question, defaultQestion);
+        while (!validatedValue || !isNaN(+validatedValue)) {
+          alert('Введите корректное значение');
+          validatedValue = prompt(question, defaultQestion);
+        }
+        return validatedValue;
+      };
+    }
+  }
+};
 
-
-
-let money = validatedPromptNumber('Введите бюджет на месяц');
-let time = validatedPromptNumber('Введите дату в формате YYYY-MM-DD');
+let validatedPromptNumber = decorators.validatePrompt('number');
+let validatedPromptString = decorators.validatePrompt('string');
 
 let appData = {
-  budget: money,
-  timeData: time,
+  budget: validatedPromptNumber('Введите бюджет на месяц'),
+  timeData: validatedPromptNumber('Введите дату в формате YYYY-MM-DD'),
   expenses: {},
   optionalExpenses: {},
   income: [],
   savings: false,
+  chooseExpenses() {
+    for (let i = 0; i < 2; i++) {
+      let fieldName = validatedPromptString('Введите обязательную статью расходов в этом месяце'),
+        fieldValue = validatedPromptNumber('Во сколько это обойдется?');
+      this.expenses[fieldName] = fieldValue;
+    }
+  },
+  chooseOptExpenses() {
+    for (let i = 0; i < 3; i++) {
+      this.optionalExpense[i + 1] = validatedPromptString('Введите необязательную статью расходов');
+    }
+  },
+  detectDayBudget(daysCount) {
+    return this.moneyPerDay = parseInt(this.budget / daysCount);
+  },
+  detectedLevel() {
+    if (this.moneyPerDay < 100) {
+      console.log('U r bomjick =)');
+    }
+    if (this.moneyPerDay > 100 && this.moneyPerDay < 2000) {
+      console.log('Congratulate! U can buy a few doshiraks');
+    }
+    if (this.moneyPerDay > 2000) {
+      console.log('Wow! R u Jeff Bezos?');
+    }
+    console.log('Возникла ошибка');
+  },
+  checkSaving() {
+    if (savings) {
+      let save = validatedPromptNumber('Какова сумма накоплений?'),
+        percent = validatedPromptNumber('Под какой процент?');
+      return this.monthIncome = save / 100 / 12 * percent;
+    }
+  },
+  chooseIncome() {
+    let incomesValues = validatedPromptString('Перечислите дополнительные доходы? (перечислите через запятую)');
+    this.income = incomesValues.split(', ').sort();
+    console.log('Способы доп. заработка: ');
+    this.income.forEach((element, index) => {
+      console.log((index + 1) + ': ' + element);
+    });
+  }
 };
-
-appDataInternalObjSetNTimes(2, 'expenses', 'Введите обязательную статью расходов в этом месяце');
-appDataInternalObjSetNTimes(3, 'optionalExpenses', 'Статья необязательных расходов?');
-alert(detectDayBudget());
-
-function appDataInternalObjSetNTimes(n, nameOfInternalObj, question) {
-  for (let i = 0; i < n; i++) {
-    let expenseItem = validatedPromptString(question);
-    let cost = validatedPromptNumber('Во сколько обойдется?');
-    appData[nameOfInternalObj][expenseItem] = cost;
-  }
+console.log("Наша программа включает в себя данные: ");
+for (const key in appData) {
+  console.log(key);
 }
-
-//return function which calls prompt(question, '') in accordance with expected type of value 
-function validatedPrompt(expectedType) {
-  if (expectedType === 'number') {
-    return function (question) {
-      let validatedValue = +prompt(question, '');
-      while (!validatedValue) {
-        alert('Введите корректное значение')
-        validatedValue = +prompt(question, '');
-      }
-      return validatedValue;
-    };
-  }
-
-  if (expectedType === 'string') {
-    return function (question) {
-      let validatedValue = prompt(question, '');
-      while (!validatedValue || !isNaN(+validatedValue)) {
-        alert('Введите корректное значение')
-        validatedValue = prompt(question, '');
-      }
-      return validatedValue;
-    };
-  }
-}
-
-function  detectDayBudget() {
-  let n = validatedPromptNumber('Введите количество дней в этом месяце');
-  return parseInt(appData.budget / n);
-}
-
-
